@@ -3,7 +3,7 @@ package ipc
 import (
 	"encoding/json"
 
-	"go-aws/internal/model"
+	"github.com/thezim/aicm/internal/model"
 )
 
 // ProtocolVersion is bumped on incompatible protocol changes.

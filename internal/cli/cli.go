@@ -14,13 +14,13 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"go-aws/internal/config"
-	"go-aws/internal/daemon"
-	"go-aws/internal/display"
-	"go-aws/internal/model"
-	"go-aws/internal/platform"
-	"go-aws/internal/tui"
-	"go-aws/internal/version"
+	"github.com/thezim/aicm/internal/config"
+	"github.com/thezim/aicm/internal/daemon"
+	"github.com/thezim/aicm/internal/display"
+	"github.com/thezim/aicm/internal/model"
+	"github.com/thezim/aicm/internal/platform"
+	"github.com/thezim/aicm/internal/tui"
+	"github.com/thezim/aicm/internal/version"
 )
 
 // Run executes the CLI and returns a process exit code.
@@ -40,7 +40,7 @@ func Run(args []string, stdout, stderr io.Writer) int {
 			printHelp(stdout)
 			return 0
 		default:
-			fmt.Fprintf(stderr, "go-aws: unknown command %q\n\n", args[0])
+			fmt.Fprintf(stderr, "aicm: unknown command %q\n\n", args[0])
 			printHelp(stderr)
 			return 2
 		}
@@ -52,9 +52,9 @@ func Run(args []string, stdout, stderr io.Writer) int {
 			return 0
 		}
 	}
-	fs := flag.NewFlagSet("go-aws", flag.ContinueOnError)
+	fs := flag.NewFlagSet("aicm", flag.ContinueOnError)
 	fs.SetOutput(stderr)
-	configPath := fs.String("config", "", "config file path (default ~/.config/go-aws/config.yml)")
+	configPath := fs.String("config", "", "config file path (default ~/.config/aicm/config.yml)")
 	profile := fs.String("profile", "", "AWS shared config profile (optional)")
 	region := fs.String("region", "", "AWS region (optional)")
 	showVersion := fs.Bool("version", false, "print version and exit")
@@ -66,7 +66,7 @@ func Run(args []string, stdout, stderr io.Writer) int {
 		return 2
 	}
 	if fs.NArg() > 0 {
-		fmt.Fprintf(stderr, "go-aws: unexpected argument %q\n", fs.Arg(0))
+		fmt.Fprintf(stderr, "aicm: unexpected argument %q\n", fs.Arg(0))
 		return 2
 	}
 	if *showVersion {
@@ -85,7 +85,7 @@ func Run(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintln(stdout, summary)
 	}
 	if err != nil {
-		fmt.Fprintf(stderr, "go-aws: %v\n", err)
+		fmt.Fprintf(stderr, "aicm: %v\n", err)
 		return 1
 	}
 	return 0
@@ -93,7 +93,7 @@ func Run(args []string, stdout, stderr io.Writer) int {
 
 func runDaemonCommand(args []string, stdout, stderr io.Writer) int {
 	if len(args) == 0 {
-		fmt.Fprintln(stderr, "usage: go-aws daemon run|status|stop")
+		fmt.Fprintln(stderr, "usage: aicm daemon run|status|stop")
 		return 2
 	}
 	switch args[0] {
@@ -113,7 +113,7 @@ func runDaemonCommand(args []string, stdout, stderr io.Writer) int {
 	case "stop":
 		return daemonStop(stdout, stderr)
 	default:
-		fmt.Fprintf(stderr, "go-aws daemon: unknown subcommand %q\n", args[0])
+		fmt.Fprintf(stderr, "aicm daemon: unknown subcommand %q\n", args[0])
 		return 2
 	}
 }
@@ -143,12 +143,12 @@ func runDaemon(configPath string, stderr io.Writer) int {
 	log.Printf("daemon: starting version=%s config=%s", version.Version, path)
 	err = daemon.Run(ctx, opts)
 	if errors.Is(err, daemon.ErrDaemonRunning) {
-		fmt.Fprintln(stderr, "go-aws daemon: already running")
+		fmt.Fprintln(stderr, "aicm daemon: already running")
 		return 0
 	}
 	if err != nil {
 		log.Printf("daemon: exited with error: %v", err)
-		fmt.Fprintf(stderr, "go-aws daemon: %v\n", err)
+		fmt.Fprintf(stderr, "aicm daemon: %v\n", err)
 		return 1
 	}
 	log.Printf("daemon: stopped")
@@ -182,7 +182,7 @@ func daemonStatus(stdout, stderr io.Writer) int {
 	defer client.Close()
 	var info model.DaemonInfo
 	if err := client.Call(ctx, "daemon_info", nil, &info); err != nil {
-		fmt.Fprintf(stderr, "go-aws daemon status: %v\n", err)
+		fmt.Fprintf(stderr, "aicm daemon status: %v\n", err)
 		return 1
 	}
 	fmt.Fprintf(stdout, "daemon: running\nversion: %s\nprotocol: %d\nstarted: %s\nconnections: %d\nclients: %d\nidle_exit_after: %s\n",
@@ -200,7 +200,7 @@ func daemonStop(stdout, stderr io.Writer) int {
 	}
 	defer client.Close()
 	if err := client.Call(ctx, "daemon_stop", nil, nil); err != nil {
-		fmt.Fprintf(stderr, "go-aws daemon stop: %v\n", err)
+		fmt.Fprintf(stderr, "aicm daemon stop: %v\n", err)
 		return 1
 	}
 	fmt.Fprintln(stdout, "daemon: stopping")
@@ -221,20 +221,20 @@ func runConnections(args []string, stdout, stderr io.Writer) int {
 	defer cancel()
 	client, err := daemon.EnsureRunning(ctx, "")
 	if err != nil {
-		fmt.Fprintf(stderr, "go-aws connections: %v\n", err)
+		fmt.Fprintf(stderr, "aicm connections: %v\n", err)
 		return 1
 	}
 	defer client.Close()
 	var conns []model.Connection
 	if err := client.Call(ctx, "list_connections", nil, &conns); err != nil {
-		fmt.Fprintf(stderr, "go-aws connections: %v\n", err)
+		fmt.Fprintf(stderr, "aicm connections: %v\n", err)
 		return 1
 	}
 	if *asJSON {
 		enc := json.NewEncoder(stdout)
 		enc.SetIndent("", "  ")
 		if err := enc.Encode(conns); err != nil {
-			fmt.Fprintf(stderr, "go-aws connections: %v\n", err)
+			fmt.Fprintf(stderr, "aicm connections: %v\n", err)
 			return 1
 		}
 		return 0
@@ -267,14 +267,14 @@ func runClose(args []string, stdout, stderr io.Writer) int {
 		return 2
 	}
 	if !*all && fs.NArg() != 1 {
-		fmt.Fprintln(stderr, "usage: go-aws close <connection-id> | go-aws close --all")
+		fmt.Fprintln(stderr, "usage: aicm close <connection-id> | aicm close --all")
 		return 2
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 	client, err := daemon.EnsureRunning(ctx, "")
 	if err != nil {
-		fmt.Fprintf(stderr, "go-aws close: %v\n", err)
+		fmt.Fprintf(stderr, "aicm close: %v\n", err)
 		return 1
 	}
 	defer client.Close()
@@ -283,7 +283,7 @@ func runClose(args []string, stdout, stderr io.Writer) int {
 		params.ID = fs.Arg(0)
 	}
 	if err := client.Call(ctx, "close_connection", params, nil); err != nil {
-		fmt.Fprintf(stderr, "go-aws close: %v\n", err)
+		fmt.Fprintf(stderr, "aicm close: %v\n", err)
 		return 1
 	}
 	if *all {
@@ -295,19 +295,22 @@ func runClose(args []string, stdout, stderr io.Writer) int {
 }
 
 func printHelp(w io.Writer) {
-	fmt.Fprint(w, `go-aws — list, start, and stop EC2 instances, open SSM console sessions, and RDP through AWS SSM
+	fmt.Fprint(w, `aicm — AWS Instance Connection Manager
+
+List, start, and stop EC2 instances, open SSM console sessions, and open RDP
+sessions through AWS SSM.
 
 Usage:
-  go-aws [--config PATH] [--profile NAME] [--region NAME]
-  go-aws daemon run [--config PATH]
-  go-aws daemon status
-  go-aws daemon stop
-  go-aws connections [--json]
-  go-aws close <connection-id> | --all
-  go-aws version
+  aicm [--config PATH] [--profile NAME] [--region NAME]
+  aicm daemon run [--config PATH]
+  aicm daemon status
+  aicm daemon stop
+  aicm connections [--json]
+  aicm close <connection-id> | --all
+  aicm version
 
 Flags:
-  --config PATH    config file (default ~/.config/go-aws/config.yml)
+  --config PATH    config file (default ~/.config/aicm/config.yml)
   --profile NAME   AWS profile fallback when the standard chain is unresolved
   --region NAME    AWS region fallback when the standard chain is unresolved
   --version        print version and exit

@@ -14,8 +14,8 @@ import (
 	"time"
 
 	"github.com/gofrs/flock"
-	"go-aws/internal/editor"
-	"go-aws/internal/model"
+	"github.com/thezim/aicm/internal/editor"
+	"github.com/thezim/aicm/internal/model"
 	"gopkg.in/yaml.v3"
 )
 
@@ -165,13 +165,13 @@ func (a *Account) UnmarshalYAML(value *yaml.Node) error {
 	return nil
 }
 
-// DefaultPath returns ~/.config/go-aws/config.yml.
+// DefaultPath returns ~/.config/aicm/config.yml.
 func DefaultPath() (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(home, ".config", "go-aws", "config.yml"), nil
+	return filepath.Join(home, ".config", "aicm", "config.yml"), nil
 }
 
 // ExpandPath expands a leading ~.

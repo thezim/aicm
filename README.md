@@ -1,8 +1,8 @@
-# go-aws
+# aicm
 
-A terminal UI for listing, starting, and stopping EC2 instances, opening interactive SSM console sessions, and launching RDP sessions to Windows instances through AWS SSM Session Manager port forwarding.
+**AWS Instance Connection Manager** — a terminal UI for listing, starting, and stopping EC2 instances, opening interactive SSM console sessions, and launching RDP sessions to Windows instances through AWS SSM Session Manager port forwarding.
 
-`go-aws` resolves your normal AWS configuration, lists instances in one account/region, and can start or stop instances from the list. It can either run `aws ssm start-session` in the foreground for an interactive console or start a port-forwarding tunnel in the background, write a temporary `.rdp` file, and hand it to your operating system's RDP client. A per-user daemon owns RDP tunnels so they keep running after the TUI exits.
+`aicm` resolves your normal AWS configuration, lists instances in one account/region, and can start or stop instances from the list. It can either run `aws ssm start-session` in the foreground for an interactive console or start a port-forwarding tunnel in the background, write a temporary `.rdp` file, and hand it to your operating system's RDP client. A per-user daemon owns RDP tunnels so they keep running after the TUI exits.
 
 ```
 TUI client ── aws ssm start-session (console, foreground)
@@ -34,7 +34,7 @@ TUI client ── aws ssm start-session (console, foreground)
 ## Requirements
 
 - Go 1.26+ to build.
-- AWS CLI v2 with the Session Manager plugin. The TUI and daemon invoke the `aws` executable from `PATH` (override with `GO_AWS_AWS_BIN` for testing).
+- AWS CLI v2 with the Session Manager plugin. The TUI and daemon invoke the `aws` executable from `PATH` (override with `AICM_AWS_BIN` for testing).
 - SSM Agent running on the target EC2 instance and network connectivity to SSM.
 - For RDP: a Windows instance with RDP enabled (port 3389 by default). RDP is intentionally unavailable for non-Windows instances and is refused by both the TUI and the daemon.
 - An RDP client registered with the OS for `.rdp` files. On Linux you may need to configure `app.rdp_opener`.
@@ -43,28 +43,28 @@ TUI client ── aws ssm start-session (console, foreground)
 ## Build
 
 ```sh
-go build -o go-aws ./cmd/go-aws
+go build -o aicm ./cmd/aicm
 go test ./...
 ```
 
 Cross-compiles with CGO disabled:
 
 ```sh
-GOOS=darwin  GOARCH=arm64 CGO_ENABLED=0 go build ./cmd/go-aws
-GOOS=linux   GOARCH=amd64 CGO_ENABLED=0 go build ./cmd/go-aws
-GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build ./cmd/go-aws
+GOOS=darwin  GOARCH=arm64 CGO_ENABLED=0 go build ./cmd/aicm
+GOOS=linux   GOARCH=amd64 CGO_ENABLED=0 go build ./cmd/aicm
+GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build ./cmd/aicm
 ```
 
 ## Usage
 
 ```text
-go-aws [--config PATH] [--profile NAME] [--region NAME]
-go-aws daemon run [--config PATH]
-go-aws daemon status
-go-aws daemon stop
-go-aws connections [--json]
-go-aws close <connection-id> | --all
-go-aws version
+aicm [--config PATH] [--profile NAME] [--region NAME]
+aicm daemon run [--config PATH]
+aicm daemon status
+aicm daemon stop
+aicm connections [--json]
+aicm close <connection-id> | --all
+aicm version
 ```
 
 ### TUI keys
@@ -102,7 +102,7 @@ By default the TUI exits after the RDP file is opened successfully. Set `app.qui
 
 ## AWS authentication and region
 
-`go-aws` uses the standard AWS SDK v2 chain first:
+`aicm` uses the standard AWS SDK v2 chain first:
 
 - `AWS_PROFILE`, `AWS_REGION`, `AWS_DEFAULT_REGION`
 - environment credentials
@@ -117,14 +117,14 @@ By default the TUI exits after the RDP file is opened successfully. Set `app.qui
 ```sh
 # SSO, explicit fallback flags
 aws sso login --profile prod
-go-aws --profile prod --region us-east-1
+aicm --profile prod --region us-east-1
 
 # Environment credentials; no flags needed
 export AWS_ACCESS_KEY_ID=...
 export AWS_SECRET_ACCESS_KEY=...
 export AWS_SESSION_TOKEN=...
 export AWS_REGION=us-east-1
-go-aws
+aicm
 ```
 
 The AWS account ID is resolved with `sts:GetCallerIdentity`. That account ID is the config key: multiple profiles/roles in the same account share one entry.
@@ -171,7 +171,7 @@ Minimum policy shape (replace region/account as needed):
 
 ## Configuration
 
-Default path: `~/.config/go-aws/config.yml` on all platforms (on Windows: `%USERPROFILE%\.config\go-aws\config.yml`). Override with `--config PATH`.
+Default path: `~/.config/aicm/config.yml` on all platforms (on Windows: `%USERPROFILE%\.config\aicm\config.yml`). Override with `--config PATH`.
 
 The file is created/updated automatically the first time an AWS account is resolved. Existing account entries are never rewritten. Unknown keys and comments are preserved when new accounts are added.
 
@@ -253,13 +253,13 @@ daemon:
 - Closing a tunnel, an AWS CLI exit, a connect timeout, or daemon shutdown removes the `.rdp` file and emits a close event.
 - Crash-recovery state contains PIDs, ports, commands, and `.rdp` paths only; it is removed on normal shutdown.
 - Daemon logs and cache data live under the OS cache directory:
-  - macOS: `~/Library/Caches/go-aws/`
-  - Linux: `${XDG_CACHE_HOME:-~/.cache}/go-aws/`
-  - Windows: `%LocalAppData%\go-aws\`
+  - macOS: `~/Library/Caches/aicm/`
+  - Linux: `${XDG_CACHE_HOME:-~/.cache}/aicm/`
+  - Windows: `%LocalAppData%\aicm\`
 
 ## Troubleshooting
 
-- `daemon: not running` — start any command that uses the daemon, or run `go-aws daemon run` manually for debugging.
+- `daemon: not running` — start any command that uses the daemon, or run `aicm daemon run` manually for debugging.
 - Check the daemon log (`daemon.log` in the cache directory) for spawn failures.
 - Console session exits immediately — confirm the instance is managed by SSM (`aws ssm describe-instance-information`), the SSM Agent is running, and the instance role allows `ssm:StartSession` with the `SSM-SessionManagerRunShell` document (or your account's custom default session document).
 - "SSM session did not become ready" — confirm the instance is managed by SSM (`aws ssm describe-instance-information`), the SSM Agent is running, and the instance role has SSM permissions.
@@ -278,6 +278,6 @@ daemon:
 - RDP is available only for instances whose EC2 platform is Windows.
 - Console sessions are foreground-only and end when the shell exits; RDP tunnels are the only daemon-managed connections.
 - No autoreconnect after an SSM session ends.
-- No detection of RDP client exit; use the Connections view or `go-aws close` to stop a tunnel.
+- No detection of RDP client exit; use the Connections view or `aicm close` to stop a tunnel.
 - No password storage or autofill; the RDP client prompts for credentials.
 - EC2 lifecycle support is limited to start and stop; terminate, reboot, and hibernate are out of scope.

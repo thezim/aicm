@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"go-aws/internal/platform"
+	"github.com/thezim/aicm/internal/platform"
 )
 
 type stateFile struct {

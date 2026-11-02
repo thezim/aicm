@@ -1,4 +1,4 @@
-// Package editor resolves the command used to edit the go-aws config file.
+// Package editor resolves the command used to edit the aicm config file.
 package editor
 
 import (

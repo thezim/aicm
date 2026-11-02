@@ -14,11 +14,11 @@ import (
 	"sync"
 	"time"
 
-	"go-aws/internal/ipc"
-	"go-aws/internal/model"
-	"go-aws/internal/platform"
-	"go-aws/internal/rdp"
-	"go-aws/internal/tunnel"
+	"github.com/thezim/aicm/internal/ipc"
+	"github.com/thezim/aicm/internal/model"
+	"github.com/thezim/aicm/internal/platform"
+	"github.com/thezim/aicm/internal/rdp"
+	"github.com/thezim/aicm/internal/tunnel"
 )
 
 // Options configures a daemon instance.

@@ -14,16 +14,16 @@ func ensureDir(path string) (string, error) {
 	return path, nil
 }
 
-// CacheDir returns the per-user cache directory for go-aws.
+// CacheDir returns the per-user cache directory for aicm.
 func CacheDir() (string, error) {
-	if v := os.Getenv("GO_AWS_CACHE_DIR"); v != "" {
+	if v := os.Getenv("AICM_CACHE_DIR"); v != "" {
 		return ensureDir(v)
 	}
 	base, err := os.UserCacheDir()
 	if err != nil {
 		return "", fmt.Errorf("resolve cache directory: %w", err)
 	}
-	return ensureDir(filepath.Join(base, "go-aws"))
+	return ensureDir(filepath.Join(base, "aicm"))
 }
 
 // RDPDir returns the directory used for generated .rdp files.

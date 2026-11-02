@@ -14,19 +14,19 @@ import (
 // ErrAlreadyRunning indicates another daemon owns the endpoint.
 var ErrAlreadyRunning = errors.New("daemon already running")
 
-// Endpoint returns the Unix socket path. GO_AWS_SOCKET overrides it for tests.
+// Endpoint returns the Unix socket path. AICM_SOCKET overrides it for tests.
 func Endpoint() (string, error) {
-	if v := os.Getenv("GO_AWS_SOCKET"); v != "" {
+	if v := os.Getenv("AICM_SOCKET"); v != "" {
 		if err := os.MkdirAll(filepath.Dir(v), 0o700); err != nil {
 			return "", err
 		}
 		return v, nil
 	}
-	dir := filepath.Join(os.TempDir(), fmt.Sprintf("go-aws-%d", os.Getuid()))
+	dir := filepath.Join(os.TempDir(), fmt.Sprintf("aicm-%d", os.Getuid()))
 	path := filepath.Join(dir, "daemon.sock")
 	// macOS caps Unix socket paths at 104 bytes, Linux at 108.
 	if len(path) > 100 {
-		dir = filepath.Join("/tmp", fmt.Sprintf("go-aws-%d", os.Getuid()))
+		dir = filepath.Join("/tmp", fmt.Sprintf("aicm-%d", os.Getuid()))
 		path = filepath.Join(dir, "daemon.sock")
 	}
 	if err := os.MkdirAll(dir, 0o700); err != nil {

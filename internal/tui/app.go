@@ -13,15 +13,15 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"go-aws/internal/awsconfig"
-	"go-aws/internal/config"
-	"go-aws/internal/daemon"
-	"go-aws/internal/display"
-	"go-aws/internal/ec2"
-	"go-aws/internal/editor"
-	"go-aws/internal/ipc"
-	"go-aws/internal/model"
-	"go-aws/internal/tunnel"
+	"github.com/thezim/aicm/internal/awsconfig"
+	"github.com/thezim/aicm/internal/config"
+	"github.com/thezim/aicm/internal/daemon"
+	"github.com/thezim/aicm/internal/display"
+	"github.com/thezim/aicm/internal/ec2"
+	"github.com/thezim/aicm/internal/editor"
+	"github.com/thezim/aicm/internal/ipc"
+	"github.com/thezim/aicm/internal/model"
+	"github.com/thezim/aicm/internal/tunnel"
 )
 
 type viewMode int

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"go-aws/internal/model"
+	"github.com/thezim/aicm/internal/model"
 )
 
 func TestBuildMapsOptions(t *testing.T) {

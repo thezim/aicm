@@ -14,11 +14,11 @@ import (
 
 	aws "github.com/aws/aws-sdk-go-v2/aws"
 
-	"go-aws/internal/awsconfig"
-	"go-aws/internal/display"
-	"go-aws/internal/ec2"
-	"go-aws/internal/ipc"
-	"go-aws/internal/model"
+	"github.com/thezim/aicm/internal/awsconfig"
+	"github.com/thezim/aicm/internal/display"
+	"github.com/thezim/aicm/internal/ec2"
+	"github.com/thezim/aicm/internal/ipc"
+	"github.com/thezim/aicm/internal/model"
 )
 
 func testApp() *App {
@@ -266,7 +266,7 @@ func TestConsoleRequiresSession(t *testing.T) {
 }
 
 func TestPrepareConsoleCmd(t *testing.T) {
-	t.Setenv("GO_AWS_AWS_BIN", "fake-aws")
+	t.Setenv("AICM_AWS_BIN", "fake-aws")
 	a := testApp()
 	a.ctx = context.Background()
 	a.region = "us-east-1"
@@ -955,10 +955,10 @@ func TestStatusBarIsLastRenderedLine(t *testing.T) {
 	if len(lines) != a.height {
 		t.Fatalf("rendered %d lines, want %d", len(lines), a.height)
 	}
-	if !strings.Contains(lines[len(lines)-1], "go-aws") || !strings.Contains(lines[len(lines)-1], "us-east-1") {
+	if !strings.Contains(lines[len(lines)-1], "aicm") || !strings.Contains(lines[len(lines)-1], "us-east-1") {
 		t.Fatalf("status bar is not the last line: %q", lines[len(lines)-1])
 	}
-	if strings.Contains(lines[0], "go-aws") {
+	if strings.Contains(lines[0], "aicm") {
 		t.Fatalf("status bar still rendered at the top: %q", lines[0])
 	}
 }

@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"go-aws/internal/ipc"
-	"go-aws/internal/platform"
+	"github.com/thezim/aicm/internal/ipc"
+	"github.com/thezim/aicm/internal/platform"
 )
 
 // TryConnect dials the daemon without starting it.
@@ -96,7 +96,7 @@ func dialDaemon(ctx context.Context) (*ipc.Client, error) {
 	}
 	if hello.Protocol != ipc.ProtocolVersion {
 		_ = client.Close()
-		return nil, fmt.Errorf("daemon protocol %d is incompatible with client protocol %d; run `go-aws daemon stop` and retry", hello.Protocol, ipc.ProtocolVersion)
+		return nil, fmt.Errorf("daemon protocol %d is incompatible with client protocol %d; run `aicm daemon stop` and retry", hello.Protocol, ipc.ProtocolVersion)
 	}
 	return client, nil
 }

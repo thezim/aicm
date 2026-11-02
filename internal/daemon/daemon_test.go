@@ -11,15 +11,15 @@ import (
 	"testing"
 	"time"
 
-	"go-aws/internal/ipc"
-	"go-aws/internal/model"
-	"go-aws/internal/tunnel"
+	"github.com/thezim/aicm/internal/ipc"
+	"github.com/thezim/aicm/internal/model"
+	"github.com/thezim/aicm/internal/tunnel"
 )
 
 // TestMain doubles as the fake AWS CLI and fake RDP opener used by the
-// integration tests. Child processes are recognized by GO_AWS_TEST_HELPER.
+// integration tests. Child processes are recognized by AICM_TEST_HELPER.
 func TestMain(m *testing.M) {
-	if os.Getenv("GO_AWS_TEST_HELPER") == "1" {
+	if os.Getenv("AICM_TEST_HELPER") == "1" {
 		os.Exit(runFakeChild())
 	}
 	os.Exit(m.Run())
@@ -28,7 +28,7 @@ func TestMain(m *testing.M) {
 func runFakeChild() int {
 	args := os.Args[1:]
 	if len(args) > 0 && args[0] == "ssm" {
-		if logPath := os.Getenv("GO_AWS_TEST_ENV_LOG"); logPath != "" {
+		if logPath := os.Getenv("AICM_TEST_ENV_LOG"); logPath != "" {
 			var lines []string
 			for _, kv := range os.Environ() {
 				if strings.HasPrefix(kv, "AWS_") {
@@ -37,7 +37,7 @@ func runFakeChild() int {
 			}
 			_ = os.WriteFile(logPath, []byte(strings.Join(lines, "\n")), 0o600)
 		}
-		mode := os.Getenv("GO_AWS_TEST_AWS_MODE")
+		mode := os.Getenv("AICM_TEST_AWS_MODE")
 		if mode == "fail" {
 			fmt.Fprintln(os.Stderr, "AccessDenied: fake ssm start-session failure")
 			return 1
@@ -74,7 +74,7 @@ func runFakeChild() int {
 		}
 	}
 	// The opener receives the .rdp path and copies it for inspection.
-	if path := os.Getenv("GO_AWS_TEST_OPENED"); path != "" {
+	if path := os.Getenv("AICM_TEST_OPENED"); path != "" {
 		for _, a := range args {
 			if strings.HasSuffix(a, ".rdp") {
 				data, err := os.ReadFile(a)
@@ -111,23 +111,23 @@ type testEnv struct {
 func newTestEnv(t *testing.T) *testEnv {
 	t.Helper()
 	cache := t.TempDir()
-	t.Setenv("GO_AWS_CACHE_DIR", cache)
-	t.Setenv("GO_AWS_AWS_BIN", os.Args[0])
-	t.Setenv("GO_AWS_TEST_HELPER", "1")
-	t.Setenv("GO_AWS_TEST_AWS_MODE", "ok")
+	t.Setenv("AICM_CACHE_DIR", cache)
+	t.Setenv("AICM_AWS_BIN", os.Args[0])
+	t.Setenv("AICM_TEST_HELPER", "1")
+	t.Setenv("AICM_TEST_AWS_MODE", "ok")
 	opened := filepath.Join(cache, "opened.rdp")
 	envLog := filepath.Join(cache, "aws-env.log")
-	t.Setenv("GO_AWS_TEST_OPENED", opened)
-	t.Setenv("GO_AWS_TEST_ENV_LOG", envLog)
+	t.Setenv("AICM_TEST_OPENED", opened)
+	t.Setenv("AICM_TEST_ENV_LOG", envLog)
 
-	sockDir, err := os.MkdirTemp("", "goaws-test-")
+	sockDir, err := os.MkdirTemp("", "aicm-test-")
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = os.RemoveAll(sockDir) })
 	sock := filepath.Join(sockDir, "daemon.sock")
-	t.Setenv("GO_AWS_SOCKET", sock)
-	t.Setenv("GO_AWS_PIPE", `\\.\pipe\go-aws-test-`+strings.ReplaceAll(strings.TrimPrefix(sockDir, os.TempDir()), string(os.PathSeparator), "-"))
+	t.Setenv("AICM_SOCKET", sock)
+	t.Setenv("AICM_PIPE", `\\.\pipe\aicm-test-`+strings.ReplaceAll(strings.TrimPrefix(sockDir, os.TempDir()), string(os.PathSeparator), "-"))
 
 	return &testEnv{cache: cache, socket: sock, opened: opened, envLog: envLog}
 }
@@ -357,7 +357,7 @@ func TestDaemonRefusesNonWindowsRDP(t *testing.T) {
 
 func TestDaemonFailureCleansUp(t *testing.T) {
 	env := newTestEnv(t)
-	t.Setenv("GO_AWS_TEST_AWS_MODE", "fail")
+	t.Setenv("AICM_TEST_AWS_MODE", "fail")
 	env.start(t, Options{ConnectTimeout: 3 * time.Second, IdleExit: time.Minute, Version: "test"})
 	conn := env.connect(t, "broken")
 	env.waitEmpty(t)
@@ -377,7 +377,7 @@ func TestDaemonFailureCleansUp(t *testing.T) {
 
 func TestDaemonProcessExitCleansUp(t *testing.T) {
 	env := newTestEnv(t)
-	t.Setenv("GO_AWS_TEST_AWS_MODE", "exit")
+	t.Setenv("AICM_TEST_AWS_MODE", "exit")
 	env.start(t, Options{ConnectTimeout: 5 * time.Second, IdleExit: time.Minute, Version: "test"})
 	conn := env.connect(t, "flaky")
 	ready := env.waitReady(t, conn.ID)
@@ -416,7 +416,7 @@ func TestDaemonIdleExit(t *testing.T) {
 func TestDaemonStaleStateReconciliation(t *testing.T) {
 	// A state entry with a dead PID must be removed without signaling anything.
 	cache := t.TempDir()
-	t.Setenv("GO_AWS_CACHE_DIR", cache)
+	t.Setenv("AICM_CACHE_DIR", cache)
 	state := stateFile{Version: 1, Entries: []stateEntry{{PID: 999999, InstanceID: "i-old", LocalPort: 44444, RDPPath: filepath.Join(cache, "missing.rdp")}}}
 	raw, _ := json.Marshal(state)
 	if err := os.WriteFile(filepath.Join(cache, "daemon-state.json"), raw, 0o600); err != nil {

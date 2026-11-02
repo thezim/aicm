@@ -1,4 +1,4 @@
-module go-aws
+module github.com/thezim/aicm
 
 go 1.26.0
 

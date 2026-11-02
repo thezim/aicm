@@ -18,14 +18,14 @@ var ErrAlreadyRunning = errors.New("daemon already running")
 
 // Endpoint returns the current user's named pipe path.
 func Endpoint() (string, error) {
-	if v := os.Getenv("GO_AWS_PIPE"); v != "" {
+	if v := os.Getenv("AICM_PIPE"); v != "" {
 		return v, nil
 	}
 	sid, err := currentUserSID()
 	if err != nil {
 		return "", err
 	}
-	return `\\.\pipe\go-aws-` + sid, nil
+	return `\\.\pipe\aicm-` + sid, nil
 }
 
 func currentUserSID() (string, error) {

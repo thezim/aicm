@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"go-aws/internal/cli"
+	"github.com/thezim/aicm/internal/cli"
 )
 
 func main() {

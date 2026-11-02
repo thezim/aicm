@@ -13,8 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"go-aws/internal/display"
-	"go-aws/internal/model"
+	"github.com/thezim/aicm/internal/display"
+	"github.com/thezim/aicm/internal/model"
 )
 
 const defaultResolution = "1920x1080"

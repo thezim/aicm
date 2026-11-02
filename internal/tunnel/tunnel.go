@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"go-aws/internal/model"
+	"github.com/thezim/aicm/internal/model"
 )
 
 var portOpenedRE = regexp.MustCompile(`(?i)\bPort\s+([0-9]+)\s+opened\b`)
@@ -29,7 +29,7 @@ func AllocatePort() (int, error) {
 // AWSBinary returns the AWS CLI executable. The environment override exists
 // for integration tests.
 func AWSBinary() string {
-	if v := strings.TrimSpace(os.Getenv("GO_AWS_AWS_BIN")); v != "" {
+	if v := strings.TrimSpace(os.Getenv("AICM_AWS_BIN")); v != "" {
 		return v
 	}
 	return "aws"

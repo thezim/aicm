@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/gofrs/flock"
-	"go-aws/internal/ipc"
-	"go-aws/internal/model"
-	"go-aws/internal/platform"
+	"github.com/thezim/aicm/internal/ipc"
+	"github.com/thezim/aicm/internal/model"
+	"github.com/thezim/aicm/internal/platform"
 )
 
 // ErrDaemonRunning is returned when another daemon holds the single-instance

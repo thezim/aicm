@@ -10,9 +10,9 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/mattn/go-runewidth"
 
-	"go-aws/internal/display"
-	"go-aws/internal/ec2"
-	"go-aws/internal/model"
+	"github.com/thezim/aicm/internal/display"
+	"github.com/thezim/aicm/internal/ec2"
+	"github.com/thezim/aicm/internal/model"
 )
 
 type themeStyles struct {
@@ -55,7 +55,7 @@ func (a *App) styles() themeStyles {
 // View renders the current screen.
 func (a *App) View() string {
 	if a.width <= 0 || a.height <= 0 {
-		return "go-aws: starting…"
+		return "aicm: starting…"
 	}
 	st := a.styles()
 	bar := a.renderStatusBar(st)
@@ -108,7 +108,7 @@ func (a *App) joinScreen(st themeStyles, bar, body string) string {
 }
 
 func (a *App) renderStatusBar(st themeStyles) string {
-	left := " go-aws"
+	left := " aicm"
 	if a.accountID != "" {
 		left += " · " + a.accountID
 	}
@@ -555,7 +555,7 @@ func (a *App) renderLoading(st themeStyles) string {
 	frame := frames[a.spinner%len(frames)]
 	lines := []string{
 		"",
-		"  go-aws",
+		"  aicm",
 		"",
 		"  " + frame + " Resolving AWS configuration and loading EC2 instances…",
 		"",
