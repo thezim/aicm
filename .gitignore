@@ -1,0 +1,7 @@
+# Build output
+/go-aws
+/bin/
+*.exe
+
+# macOS
+.DS_Store
