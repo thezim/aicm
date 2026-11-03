@@ -1,5 +1,8 @@
 # aicm
 
+[![CI](https://github.com/thezim/aicm/actions/workflows/ci.yml/badge.svg)](https://github.com/thezim/aicm/actions/workflows/ci.yml)
+[![Release](https://github.com/thezim/aicm/actions/workflows/release.yml/badge.svg)](https://github.com/thezim/aicm/actions/workflows/release.yml)
+
 **AWS Instance Connection Manager** — a terminal UI for listing, starting, and stopping EC2 instances, opening interactive SSM console sessions, and launching RDP sessions to Windows instances through AWS SSM Session Manager port forwarding.
 
 `aicm` resolves your normal AWS configuration, lists instances in one account/region, and can start or stop instances from the list. It can either run `aws ssm start-session` in the foreground for an interactive console or start a port-forwarding tunnel in the background, write a temporary `.rdp` file, and hand it to your operating system's RDP client. A per-user daemon owns RDP tunnels so they keep running after the TUI exits.
@@ -54,6 +57,12 @@ GOOS=darwin  GOARCH=arm64 CGO_ENABLED=0 go build ./cmd/aicm
 GOOS=linux   GOARCH=amd64 CGO_ENABLED=0 go build ./cmd/aicm
 GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build ./cmd/aicm
 ```
+
+### CI and releases
+
+Every push to `main` and every pull request runs the CI workflow, which tests natively on all GitHub-hosted runner OS/architecture combinations (Linux x64/arm64, Windows x64/arm64, macOS Intel/Apple Silicon) and cross-compiles every target in [`.github/build-targets.json`](.github/build-targets.json).
+
+Pushing a `v*` tag (for example `v1.2.3`) runs the release workflow: it tests the code, builds `.tar.gz` archives (`.zip` on Windows) for every target, generates SHA-256 checksums, attests build provenance, and publishes everything to the GitHub release. You can also start a release manually from the Actions tab.
 
 ## Usage
 
