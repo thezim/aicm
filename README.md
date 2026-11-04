@@ -60,9 +60,9 @@ GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build ./cmd/aicm
 
 ### CI and releases
 
-Every push to `main` and every pull request runs the CI workflow, which tests natively on all GitHub-hosted runner OS/architecture combinations (Linux x64/arm64, Windows x64/arm64, macOS Intel/Apple Silicon) and cross-compiles every target in [`.github/build-targets.json`](.github/build-targets.json).
+Every push to `main` and every pull request runs the CI workflow, which tests natively on all GitHub-hosted runner OS/architecture combinations (Linux x64/arm64, Windows x64/arm64, macOS Intel/Apple Silicon) and cross-compiles every target in [`.github/build-targets.json`](.github/build-targets.json). Each cross-compiled binary is uploaded as a downloadable workflow artifact.
 
-Pushing a `v*` tag (for example `v1.2.3`) runs the release workflow: it tests the code, builds `.tar.gz` archives (`.zip` on Windows) for every target, generates SHA-256 checksums, attests build provenance, and publishes everything to the GitHub release. You can also start a release manually from the Actions tab.
+Pushing a `v*` tag (for example `v1.2.3`) or publishing a GitHub release runs the release workflow: it tests the code, builds `.tar.gz` archives (`.zip` on Windows) for every target, generates SHA-256 checksums, attests build provenance, and publishes everything to the GitHub release. You can also start a release manually from the Actions tab.
 
 ## Usage
 
