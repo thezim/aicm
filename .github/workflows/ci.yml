@@ -177,3 +177,11 @@ jobs:
           fi
           go build -o "$out" ./cmd/aicm
           ls -lh "$out"
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v7
+        with:
+          name: aicm-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: ${{ runner.temp }}/aicm-*
+          if-no-files-found: error
+          retention-days: 30
